@@ -3,6 +3,7 @@ const { Router } = require('express')
 const { Quiz } = require('../../models')
 
 const questionRouter = require('./questions/index')
+const { filterQuestion } = require('./questions/manager')
 
 const router = new Router()
 
@@ -10,7 +11,12 @@ router.use('/:quizId/questions', questionRouter)
 
 router.get('/', (req, res) => {
   try {
-    res.status(200).json(Quiz.get())
+    const quizzes = Quiz.get()
+    quizzes.forEach((q) => {
+      // eslint-disable-next-line no-param-reassign
+      q.questions = filterQuestion(q.id)
+    })
+    res.status(200).json(quizzes)
   } catch (err) {
     res.status(500).json(err)
   }
@@ -18,7 +24,9 @@ router.get('/', (req, res) => {
 
 router.get('/:quizId', (req, res) => {
   try {
-    res.status(200).json(Quiz.getById(req.params.quizId))
+    const quiz = Quiz.getById(req.params.quizId)
+    quiz.questions = filterQuestion(req.params.quizId)
+    res.status(200).json(quiz)
   } catch (err) {
     res.status(500).json(err)
   }

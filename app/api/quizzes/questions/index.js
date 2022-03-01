@@ -1,13 +1,14 @@
 const { Router } = require('express')
 
 const { Question } = require('../../../models')
+const { filterQuestion } = require('./manager')
 
 const router = new Router({ mergeParams: true })
 
 router.get('/', (req, res) => {
   try {
     // eslint-disable-next-line radix
-    res.status(200).json(Question.get().filter((q) => parseInt(q.quizId) === parseInt(req.params.quizId)))
+    res.status(200).json(filterQuestion(req.params.quizId))
   } catch (err) {
     res.status(500).json(err)
   }
@@ -15,8 +16,7 @@ router.get('/', (req, res) => {
 
 router.get('/:questionId', (req, res) => {
   try {
-    // eslint-disable-next-line radix
-    if (Question.getById(req.params.questionId).quizId === parseInt(req.params.quizId)) {
+    if (Question.getById(req.params.questionId).quizId === parseInt(req.params.quizId, 10)) {
       res.status(200).json(Question.getById(req.params.questionId))
     } else {
       res.status(400).json({ error: 'question does not belong to quiz' })
@@ -28,8 +28,7 @@ router.get('/:questionId', (req, res) => {
 
 router.delete('/:questionId', (req, res) => {
   try {
-    // eslint-disable-next-line radix
-    if (Question.getById(req.params.questionId).quizId === parseInt(req.params.quizId)) {
+    if (Question.getById(req.params.questionId).quizId === parseInt(req.params.quizId, 10)) {
       Question.delete(req.params.questionId)
       res.status(200).json({ msg: 'ok' })
     } else {
@@ -42,8 +41,7 @@ router.delete('/:questionId', (req, res) => {
 
 router.put('/:questionId', (req, res) => {
   try {
-    // eslint-disable-next-line radix
-    if (Question.getById(req.params.questionId).quizId === parseInt(req.params.quizId)) {
+    if (Question.getById(req.params.questionId).quizId === parseInt(req.params.quizId, 10)) {
       res.status(200).json(Question.update(req.params.questionId, req.body))
     } else {
       res.status(400).json({ error: 'question does not belong to quiz' })
@@ -55,8 +53,7 @@ router.put('/:questionId', (req, res) => {
 
 router.post('/', (req, res) => {
   try {
-    // eslint-disable-next-line radix
-    const question = Question.create({ ...req.body, quizId: parseInt(req.params.quizId) })
+    const question = Question.create({ ...req.body, quizId: parseInt(req.params.quizId, 10) })
     res.status(201).json(question)
   } catch (err) {
     if (err.name === 'ValidationError') {
